@@ -1,0 +1,47 @@
+#!/usr/bin/perl
+
+use strict;
+use CGI;
+use DBI;
+
+# Connect to MySQL database
+my $dsn = "DBI:mysql:database=exercise;host=silo.luddy.indiana.edu:21247";
+my $username = "navya";
+my $password = "navya";
+
+my $dbh = DBI->connect($dsn, $username, $password) or die "Unable to connect: $DBI::errstr";
+
+# Prepare and execute SQL query
+my $query = "select username, firstName, lastName from (select * from performers left join ratings on player = username) as whatever where judge is NULL";
+my $sth = $dbh->prepare($query);
+$sth->execute() or die "Unable to execute query: $DBI::errstr";
+
+# Print results in HTML format
+print "Content-type: text/html\n\n";
+print "<html><head><title>MySQL Query Results</title></head><body>";
+
+print "<h1>MySQL Query Results</h1>";
+print "<table border='1'><tr>";
+
+# Print column headers
+my @columns = @{$sth->{NAME}};
+foreach my $column (@columns) {
+    print "<th>$column</th>";
+}
+print "</tr>";
+
+# Print rows
+while (my @row = $sth->fetchrow_array) {
+    print "<tr>";
+    foreach my $value (@row) {
+        print "<td>$value</td>";
+    }
+    print "</tr>";
+}
+print "</table>";
+
+print "</body></html>";
+
+# Disconnect from database
+$sth->finish();
+$dbh->disconnect();

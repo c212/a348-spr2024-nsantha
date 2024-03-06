@@ -1,0 +1,39 @@
+#!/usr/bin/python3
+
+import cgi
+import MySQLdb
+
+# Connect to MySQL database
+db = MySQLdb.connect(host="silo.cs.indiana.edu",port=21247, user="navya", passwd="navya", db="exercise")
+cursor = db.cursor()
+
+# Execute SQL query
+query = "select username, lastName, firstName, avg(rating) from performers, ratings where performers.username = ratings.player group by username order by avg(rating) desc;"
+cursor.execute(query)
+
+# Print results in HTML format
+print("Content-type: text/html\n\n")
+print("<html><head><title>MySQL Query Results</title></head><body>")
+
+print("<h1>MySQL Query Results</h1>")
+print("<table border='1'><tr>")
+
+# Print column headers
+columns = [i[0] for i in cursor.description]
+for column in columns:
+    print("<th>%s</th>" % column)
+print("</tr>")
+
+# Print rows
+for row in cursor.fetchall():
+    print("<tr>")
+    for value in row:
+        print("<td>%s</td>" % value)
+    print("</tr>")
+
+print("</table>")
+print("</body></html>")
+
+# Disconnect from database
+cursor.close()
+db.close()
